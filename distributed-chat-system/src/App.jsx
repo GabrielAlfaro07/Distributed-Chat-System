@@ -1,3 +1,7 @@
+// App.tsx
+import React from "react";
+import HomeScreen from "./components/screens/HomeScreen";
+
 export default function App() {
-  return <h1 className="text-3xl font-bold underline">Hello world!</h1>;
+  return <HomeScreen />;
 }
