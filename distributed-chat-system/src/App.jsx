@@ -1,6 +1,7 @@
 // App.tsx
 import React from "react";
 import HomeScreen from "./components/screens/HomeScreen";
+import { ToastContainer } from "react-toastify";
 
 export default function App() {
   return (

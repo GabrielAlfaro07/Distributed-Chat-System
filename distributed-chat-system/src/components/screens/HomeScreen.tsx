@@ -1,7 +1,7 @@
 // HomeScreen.tsx
 import React from "react";
 import Sidebar from "../sidebars/Sidebar";
-import Title from "../titles/Title";
+import ChatHeader from "../headers/ChatHeader"; // Import the new ChatHeader component
 import Message from "../messages/Message";
 import MessageInput from "../inputs/MessageInput";
 
@@ -13,9 +13,7 @@ const HomeScreen: React.FC = () => {
       {/* Main Chat Area */}
       <main className="flex-1 flex flex-col">
         {/* Chat Header */}
-        <header className="p-4 bg-white border-b border-gray-200">
-          <Title text="Chat Name" />
-        </header>
+        <ChatHeader title="Chat Name" />
 
         {/* Chat Messages */}
         <div className="flex-1 p-4 overflow-y-auto">

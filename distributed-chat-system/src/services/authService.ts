@@ -118,3 +118,16 @@ export const signOut = async () => {
   toast.success("Signed out successfully!");
   return { message: "Signed out successfully" };
 };
+
+// New function to fetch user info
+export const fetchUser = async () => {
+  const { data, error } = await supabase.auth.getSession();
+
+  if (error) {
+    console.error("Error fetching user session:", error.message);
+    return { error };
+  }
+
+  const user = data?.session?.user;
+  return user || null;
+};
