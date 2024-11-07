@@ -44,7 +44,6 @@ export const signUp = async (
     return { error: insertError };
   }
 
-  toast.success("Sign-up successful!");
   return { user };
 };
 
@@ -77,7 +76,6 @@ export const signIn = async (email: string, password: string) => {
     }
   }
 
-  toast.success("Sign-in successful!");
   return { user };
 };
 
@@ -114,20 +112,38 @@ export const signOut = async () => {
     toast.error("Sign-out error: " + signOutError.message);
     return { error: signOutError };
   }
-
-  toast.success("Signed out successfully!");
   return { message: "Signed out successfully" };
 };
 
 // New function to fetch user info
 export const fetchUser = async () => {
-  const { data, error } = await supabase.auth.getSession();
+  // Get the session to fetch the current authenticated user
+  const { data: sessionData, error: sessionError } =
+    await supabase.auth.getSession();
+
+  if (sessionError) {
+    console.error("Error fetching user session:", sessionError.message);
+    return { error: sessionError };
+  }
+
+  const user = sessionData?.session?.user;
+  if (!user) {
+    // If there is no user, return null
+    return null;
+  }
+
+  // Fetch user details from the "Users" table based on the user's ID (id_user)
+  const { data, error } = await supabase
+    .from("Users")
+    .select("*")
+    .eq("id_user", user.id)
+    .single(); // Assuming there will only be one user with that id_user
 
   if (error) {
-    console.error("Error fetching user session:", error.message);
+    console.error("Error fetching user info from Users table:", error.message);
     return { error };
   }
 
-  const user = data?.session?.user;
-  return user || null;
+  // Return user data from the Users table
+  return data || null; // If no user data is found, return null
 };

@@ -15,7 +15,9 @@ const Sidebar: React.FC = () => {
 
   return (
     <aside className="w-1/3 bg-white border-r border-gray-200 p-4">
-      <Title text="Chats" />
+      <div className="mb-4">
+        <Title text="Chats" />
+      </div>
       <Searchbar onSearch={setSearchQuery} />
       <ul>
         {filteredChats.map((chat, index) => (
