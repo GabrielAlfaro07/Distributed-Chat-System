@@ -1,11 +1,15 @@
 // Input.tsx
 import React, { useState, useRef, useEffect } from "react";
 
-interface InputProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+interface TextAreaInputProps
+  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   onInputResize?: (height: number) => void;
 }
 
-const Input: React.FC<InputProps> = ({ onInputResize, ...props }) => {
+const TextAreaInput: React.FC<TextAreaInputProps> = ({
+  onInputResize,
+  ...props
+}) => {
   const [text, setText] = useState("");
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -37,4 +41,4 @@ const Input: React.FC<InputProps> = ({ onInputResize, ...props }) => {
   );
 };
 
-export default Input;
+export default TextAreaInput;
