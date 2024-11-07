@@ -1,5 +1,6 @@
 // authService.ts
 import { supabase } from "../../supabaseClient";
+import { toast } from "react-toastify";
 
 export interface UserInfo {
   username: string;
@@ -8,7 +9,7 @@ export interface UserInfo {
   profile_picture_url?: string;
 }
 
-// Sign up function remains the same
+// Sign up function with Toast notifications
 export const signUp = async (
   email: string,
   password: string,
@@ -22,7 +23,7 @@ export const signUp = async (
   const user = data?.user;
 
   if (signUpError) {
-    console.error("Sign-up error:", signUpError.message);
+    toast.error("Sign-up failed: " + signUpError.message);
     return { error: signUpError };
   }
 
@@ -39,14 +40,15 @@ export const signUp = async (
   ]);
 
   if (insertError) {
-    console.error("Insert user info error:", insertError.message);
+    toast.error("Error saving user info: " + insertError.message);
     return { error: insertError };
   }
 
+  toast.success("Sign-up successful!");
   return { user };
 };
 
-// Modify signIn to update user's status to "online"
+// SignIn function with Toast notifications
 export const signIn = async (email: string, password: string) => {
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
@@ -56,7 +58,7 @@ export const signIn = async (email: string, password: string) => {
   const user = data?.user;
 
   if (error) {
-    console.error("Sign-in error:", error.message);
+    toast.error("Sign-in failed: " + error.message);
     return { error };
   }
 
@@ -75,45 +77,44 @@ export const signIn = async (email: string, password: string) => {
     }
   }
 
+  toast.success("Sign-in successful!");
   return { user };
 };
 
-// Modify signOut to update user's status to "offline"
+// SignOut function with Toast notifications
 export const signOut = async () => {
-  // Retrieve the current session to access the user information
   const { data: sessionData, error: sessionError } =
     await supabase.auth.getSession();
 
   if (sessionError) {
-    console.error("Error retrieving session:", sessionError.message);
+    toast.error("Session retrieval error: " + sessionError.message);
     return { error: sessionError };
   }
 
   const user = sessionData?.session?.user;
 
   if (user) {
-    // Update user's status to "offline" before signing out
     const { error: updateError } = await supabase
       .from("Users")
       .update({
-        status: "online",
+        status: "offline",
         last_active: new Date().toISOString(),
       })
       .eq("id_user", user.id);
 
     if (updateError) {
-      console.error("Error updating user status:", updateError.message);
+      toast.error("Error updating status: " + updateError.message);
       return { error: updateError };
     }
   }
 
-  // Perform sign out
   const { error: signOutError } = await supabase.auth.signOut();
 
   if (signOutError) {
-    console.error("Sign-out error:", signOutError.message);
+    toast.error("Sign-out error: " + signOutError.message);
     return { error: signOutError };
   }
 
+  toast.success("Signed out successfully!");
   return { message: "Signed out successfully" };
 };
