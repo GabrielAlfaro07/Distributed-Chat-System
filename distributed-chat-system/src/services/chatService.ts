@@ -1,14 +1,34 @@
 import { supabase } from "../../supabaseClient";
+import { toast } from "react-toastify";
 
-// Select all chats for a user
+// Fetch complete chat details where the user is a participant
 export const getChatsByUserId = async (userId: string) => {
-  const { data, error } = await supabase
+  const { data: chatParticipantData, error: participantError } = await supabase
     .from("ChatParticipants")
     .select("id_chat")
     .eq("id_user", userId);
 
-  if (error) throw error;
-  return data;
+  if (participantError) throw participantError;
+
+  const chatIds = chatParticipantData.map((chat) => chat.id_chat);
+  if (chatIds.length === 0) return [];
+
+  const { data: chatData, error: chatError } = await supabase
+    .from("Chats")
+    .select(
+      `
+      id_chat,
+      ChatParticipants(id_user, Users(username, profile_picture_url)),
+      Messages(content, created_at, id_sender)
+    `
+    )
+    .in("id_chat", chatIds)
+    .order("created_at", { foreignTable: "Messages", ascending: false })
+    .limit(1, { foreignTable: "Messages" });
+
+  if (chatError) throw chatError;
+
+  return chatData;
 };
 
 // Insert a new chat
@@ -20,6 +40,7 @@ export const createChat = async (name: string) => {
     .single();
 
   if (error) throw error;
+  toast.success("Chat created successfully!");
   return data;
 };
 
@@ -46,5 +67,6 @@ export const removeChatParticipant = async (idChat: string, idUser: string) => {
     .eq("id_user", idUser);
 
   if (error) throw error;
+  toast.success("Participant removed successfully!");
   return data;
 };

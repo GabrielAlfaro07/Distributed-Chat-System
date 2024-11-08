@@ -7,7 +7,11 @@ import ProfileDisplay from "../displays/ProfileDisplay";
 import RegisterForm from "../forms/RegisterForm"; // Import RegisterForm
 import { signOut } from "../../services/authService"; // Import signOut function
 
-const ProfileButton: React.FC = () => {
+interface ProfileButtonProps {
+  refreshChats: () => void; // Add refreshChats prop to trigger chat refresh
+}
+
+const ProfileButton: React.FC<ProfileButtonProps> = ({ refreshChats }) => {
   const [user, setUser] = useState<any>(null);
   const [showProfile, setShowProfile] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false); // Manage the toggle state
@@ -32,20 +36,24 @@ const ProfileButton: React.FC = () => {
     setUser(null); // Clear user state after logout
     getUser(); // Refresh user data (should be null after logout)
     setShowProfile(false);
+    refreshChats(); // Refresh chats after logout
   };
 
   const handleLoginSuccess = () => {
     getUser(); // Refresh user data after login
     setShowProfile(true); // Automatically show the profile after login
+    refreshChats(); // Refresh chats after login
   };
 
   const handleRegisterSuccess = () => {
+    toggleForm();
     getUser(); // Refresh user data after registration
     setShowProfile(true); // Automatically show the profile after registration
+    refreshChats(); // Refresh chats after registration
   };
 
   return (
-    <div className="relative">
+    <div className="relative flex items-end">
       {/* Profile Button */}
       <button onClick={toggleProfileDisplay} className="text-gray-600">
         <FontAwesomeIcon icon={faUser} size="xl" />
@@ -53,7 +61,7 @@ const ProfileButton: React.FC = () => {
 
       {/* Floating Profile/Log In Display */}
       {showProfile && (
-        <div className="absolute right-0 mt-2 p-4 bg-white border border-gray-200 shadow-lg rounded-md z-10 w-80">
+        <div className="absolute left-8 mt-2 p-4 bg-white border border-gray-200 shadow-lg rounded-md z-10 w-80">
           {user ? (
             <ProfileDisplay user={user} onLogoutSuccess={handleLogoutSuccess} />
           ) : isRegistering ? (

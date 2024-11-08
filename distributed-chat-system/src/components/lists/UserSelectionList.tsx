@@ -32,7 +32,7 @@ const UserSelectionList: React.FC<UserSelectionListProps> = ({
   return (
     <div className="bg-gray-100 p-4 rounded shadow-md max-h-60 overflow-y-auto">
       {users.map((user) => (
-        <div key={user.id_user} className="flex items-center space-x-2 mb-2">
+        <div key={user.id_user} className="flex items-center space-x-2">
           <input
             type="checkbox"
             checked={selectedUsers.includes(user.id_user)}

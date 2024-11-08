@@ -116,8 +116,8 @@ export const signOut = async () => {
   return { message: "Signed out successfully" };
 };
 
-// Fetch user function
-export const fetchUser = async (): Promise<UserInfo | null> => {
+// Fetch user by ID or current session user if no ID is provided
+export const fetchUser = async (id?: string): Promise<UserInfo | null> => {
   const { data: sessionData, error: sessionError } =
     await supabase.auth.getSession();
 
@@ -129,16 +129,18 @@ export const fetchUser = async (): Promise<UserInfo | null> => {
   const user = sessionData?.session?.user;
   if (!user) return null;
 
+  const userId = id || user.id;
+
   const { data, error } = await supabase
     .from("Users")
     .select("*")
-    .eq("id_user", user.id)
+    .eq("id_user", userId)
     .single();
 
   if (error) {
-    console.error("Error fetching user info from Users table:", error.message);
+    console.error("Error fetching user:", error.message);
     return null;
   }
 
-  return data as UserInfo; // Explicitly type the return value as UserInfo
+  return data as UserInfo;
 };
