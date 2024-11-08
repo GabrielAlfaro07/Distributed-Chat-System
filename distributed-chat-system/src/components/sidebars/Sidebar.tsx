@@ -5,12 +5,17 @@ import Searchbar from "../searchbars/Searchbar";
 import AddChatButton from "../buttons/AddChatButton";
 import { fetchUser } from "../../services/authService";
 import { getChatsByUserId } from "../../services/chatService";
-import ProfileButton from "../buttons/ProfileButton"; // Import ProfileButton
+import ProfileButton from "../buttons/ProfileButton";
 
-const Sidebar: React.FC = () => {
+interface SidebarProps {
+  onSelectChat: (chat: any) => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ onSelectChat }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [chats, setChats] = useState<any[]>([]);
   const [sessionUserId, setSessionUserId] = useState<string | null>(null);
+  const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
 
   const loadChats = async () => {
     const sessionUser = await fetchUser();
@@ -18,12 +23,26 @@ const Sidebar: React.FC = () => {
       setSessionUserId(sessionUser.id_user);
       const chatData = await getChatsByUserId(sessionUser.id_user);
       setChats(chatData);
+    } else {
+      setSessionUserId(null);
+      setChats([]);
     }
   };
 
   useEffect(() => {
     loadChats();
   }, []);
+
+  const handleChatSelect = (chat: any) => {
+    const otherParticipant = chat.ChatParticipants.find(
+      (participant: any) => participant.id_user !== sessionUserId
+    );
+    const chatName = otherParticipant?.Users?.username || "Unknown";
+
+    // Set selected chat with the name of the other participant
+    onSelectChat({ ...chat, name: chatName });
+    setSelectedChatId(chat.id_chat);
+  };
 
   const filteredChats = chats.filter((chat) => {
     const otherParticipant = chat.ChatParticipants?.find(
@@ -59,19 +78,20 @@ const Sidebar: React.FC = () => {
             return (
               <SidebarItem
                 key={chat.id_chat}
-                name={otherParticipant.Users.username} // Use other participant's username
+                name={otherParticipant.Users.username}
                 profilePictureUrl={otherParticipant.Users.profile_picture_url}
                 lastMessage={
                   lastMessage
                     ? `${messagePrefix}: ${lastMessage.content}`
                     : "No messages yet"
                 }
+                onClick={() => handleChatSelect(chat)}
+                selected={chat.id_chat === selectedChatId}
               />
             );
           })}
         </ul>
       </div>
-      {/* Add ProfileButton in the footer */}
       <div className="mt-auto">
         <ProfileButton refreshChats={loadChats} />
       </div>

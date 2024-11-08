@@ -32,14 +32,16 @@ export const getChatsByUserId = async (userId: string) => {
 };
 
 // Insert a new chat
-export const createChat = async (name: string) => {
+export const createChat = async (sessionUserId: string) => {
+  // Create a new chat with the session user
   const { data, error } = await supabase
     .from("Chats")
-    .insert({ name })
+    .insert([{ created_by: sessionUserId }]) // Optionally, save who created the chat
     .select("id_chat")
     .single();
 
   if (error) throw error;
+
   toast.success("Chat created successfully!");
   return data;
 };

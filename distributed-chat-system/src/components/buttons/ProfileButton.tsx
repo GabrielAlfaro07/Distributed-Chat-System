@@ -34,9 +34,8 @@ const ProfileButton: React.FC<ProfileButtonProps> = ({ refreshChats }) => {
 
   const handleLogoutSuccess = () => {
     setUser(null); // Clear user state after logout
-    getUser(); // Refresh user data (should be null after logout)
-    setShowProfile(false);
     refreshChats(); // Refresh chats after logout
+    setShowProfile(false);
   };
 
   const handleLoginSuccess = () => {
