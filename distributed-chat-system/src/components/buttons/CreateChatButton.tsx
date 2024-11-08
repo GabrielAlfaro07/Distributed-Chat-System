@@ -43,7 +43,7 @@ const CreateChatButton: React.FC<CreateChatButtonProps> = ({
       }
 
       // Create a new chat with the first user's username as the chat name
-      const chat = await createChat(firstUser.username);
+      const chat = await createChat(sessionUserId);
 
       if (!chat || !chat.id_chat) {
         throw new Error("Failed to create chat");

@@ -73,8 +73,7 @@ const Sidebar: React.FC = () => {
       </div>
       {/* Add ProfileButton in the footer */}
       <div className="mt-auto">
-        <ProfileButton refreshChats={loadChats} />{" "}
-        {/* Pass loadChats as a prop */}
+        <ProfileButton refreshChats={loadChats} />
       </div>
     </aside>
   );
