@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import SidebarItem from "./SidebarItem";
 import Title from "../titles/Title";
 import Searchbar from "../searchbars/Searchbar"; // Adjust path as needed
+import AddChatButton from "../buttons/AddChatButton"; // Adjust path as needed
 
 const Sidebar: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -15,8 +16,9 @@ const Sidebar: React.FC = () => {
 
   return (
     <aside className="w-1/3 bg-white border-r border-gray-200 p-4">
-      <div className="mb-4">
+      <div className="flex items-center justify-between mb-4">
         <Title text="Chats" />
+        <AddChatButton />
       </div>
       <Searchbar onSearch={setSearchQuery} />
       <ul>

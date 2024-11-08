@@ -14,6 +14,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
   onToggleForm,
   onRegisterSuccess,
 }) => {
+  const [id_user, setid_user] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
@@ -22,6 +23,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
   const [profilePictureUrl, setProfilePictureUrl] = useState("");
 
   const _userInfo: UserInfo = {
+    id_user,
     username,
     phone_number: phoneNumber,
     information,

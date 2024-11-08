@@ -2,7 +2,9 @@
 import { supabase } from "../../supabaseClient";
 import { toast } from "react-toastify";
 
+// Define the updated UserInfo interface with id_user
 export interface UserInfo {
+  id_user: string;
   username: string;
   phone_number: string;
   information?: string;
@@ -34,7 +36,7 @@ export const signUp = async (
       phone_number: userInfo.phone_number,
       information: userInfo.information || "",
       profile_picture_url: userInfo.profile_picture_url || "",
-      status: "offline", // Initialize as 'offline'
+      status: "offline",
       last_active: new Date().toISOString(),
     },
   ]);
@@ -47,7 +49,7 @@ export const signUp = async (
   return { user };
 };
 
-// SignIn function with Toast notifications
+// Sign-In function with Toast notifications
 export const signIn = async (email: string, password: string) => {
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
@@ -61,7 +63,6 @@ export const signIn = async (email: string, password: string) => {
     return { error };
   }
 
-  // Update user's status to "online" and last_active timestamp
   if (user) {
     const { error: updateError } = await supabase
       .from("Users")
@@ -79,7 +80,7 @@ export const signIn = async (email: string, password: string) => {
   return { user };
 };
 
-// SignOut function with Toast notifications
+// Sign-Out function with Toast notifications
 export const signOut = async () => {
   const { data: sessionData, error: sessionError } =
     await supabase.auth.getSession();
@@ -115,35 +116,29 @@ export const signOut = async () => {
   return { message: "Signed out successfully" };
 };
 
-// New function to fetch user info
-export const fetchUser = async () => {
-  // Get the session to fetch the current authenticated user
+// Fetch user function
+export const fetchUser = async (): Promise<UserInfo | null> => {
   const { data: sessionData, error: sessionError } =
     await supabase.auth.getSession();
 
   if (sessionError) {
     console.error("Error fetching user session:", sessionError.message);
-    return { error: sessionError };
-  }
-
-  const user = sessionData?.session?.user;
-  if (!user) {
-    // If there is no user, return null
     return null;
   }
 
-  // Fetch user details from the "Users" table based on the user's ID (id_user)
+  const user = sessionData?.session?.user;
+  if (!user) return null;
+
   const { data, error } = await supabase
     .from("Users")
     .select("*")
     .eq("id_user", user.id)
-    .single(); // Assuming there will only be one user with that id_user
+    .single();
 
   if (error) {
     console.error("Error fetching user info from Users table:", error.message);
-    return { error };
+    return null;
   }
 
-  // Return user data from the Users table
-  return data || null; // If no user data is found, return null
+  return data as UserInfo; // Explicitly type the return value as UserInfo
 };
