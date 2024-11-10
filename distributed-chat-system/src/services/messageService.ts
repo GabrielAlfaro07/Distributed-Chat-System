@@ -1,5 +1,32 @@
 import { supabase } from "../../supabaseClient";
 
+export const subscribeToMessages = (
+  chatId: string,
+  onMessageReceived: (message: any) => void
+) => {
+  const messageChannel = supabase
+    .channel(`messages_channel_${chatId}`)
+    .on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "Messages",
+        filter: `id_chat=eq.${chatId}`,
+      },
+      (payload) => {
+        onMessageReceived(payload.new);
+      }
+    )
+    .subscribe();
+
+  return messageChannel;
+};
+
+export const unsubscribe = async (subscription: any) => {
+  await subscription.unsubscribe();
+};
+
 // Fetch messages by chat ID, ordered by creation time
 export const getMessagesByChatId = async (chatId: string) => {
   const { data, error } = await supabase

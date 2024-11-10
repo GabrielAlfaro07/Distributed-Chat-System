@@ -1,6 +1,31 @@
 import { supabase } from "../../supabaseClient";
 import { toast } from "react-toastify";
 
+export const subscribeToChats = (
+  userId: string,
+  onChatAdded: (chat: any) => void
+) => {
+  const chatSubscription = supabase
+    .channel("chat_channel") // Optionally specify a custom channel name
+    .on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "ChatParticipants",
+        filter: `id_user=eq.${userId}`,
+      },
+      async (payload) => {
+        // Fetch all chats for the user after a new chat is added
+        const updatedChats = await getChatsByUserId(userId);
+        onChatAdded(updatedChats); // Pass the updated chat list to the callback function
+      }
+    )
+    .subscribe();
+
+  return chatSubscription;
+};
+
 // Fetch complete chat details where the user is a participant
 export const getChatsByUserId = async (userId: string) => {
   const { data: chatParticipantData, error: participantError } = await supabase
@@ -44,6 +69,32 @@ export const createChat = async (sessionUserId: string) => {
 
   toast.success("Chat created successfully!");
   return data;
+};
+
+// Delete a chat by its ID
+export const deleteChatById = async (idChat: string) => {
+  try {
+    // Delete all participants in the chat
+    const { error: participantsError } = await supabase
+      .from("ChatParticipants")
+      .delete()
+      .eq("id_chat", idChat);
+
+    if (participantsError) throw participantsError;
+
+    // Delete the chat itself
+    const { error: chatError } = await supabase
+      .from("Chats")
+      .delete()
+      .eq("id_chat", idChat);
+
+    if (chatError) throw chatError;
+
+    toast.success("Chat deleted successfully!");
+  } catch (error) {
+    console.error("Error deleting chat:", error);
+    toast.error("Failed to delete chat.");
+  }
 };
 
 // Add a participant to a chat

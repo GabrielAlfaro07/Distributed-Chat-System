@@ -1,43 +1,29 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import SidebarItem from "./SidebarItem";
 import Title from "../titles/Title";
 import Searchbar from "../searchbars/Searchbar";
 import AddChatButton from "../buttons/AddChatButton";
 import { fetchUser } from "../../services/authService";
-import { getChatsByUserId } from "../../services/chatService";
 import ProfileButton from "../buttons/ProfileButton";
 
 interface SidebarProps {
   onSelectChat: (chat: any) => void;
   onLogout: () => void;
   onLogin: () => void;
+  chats: any[]; // Use chats passed from HomeScreen
+  refreshChats: () => void; // Call to refresh chats when needed
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
   onSelectChat,
   onLogout,
   onLogin,
+  chats,
+  refreshChats,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [chats, setChats] = useState<any[]>([]);
   const [sessionUserId, setSessionUserId] = useState<string | null>(null);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
-
-  const loadChats = async () => {
-    const sessionUser = await fetchUser();
-    if (sessionUser?.id_user) {
-      setSessionUserId(sessionUser.id_user);
-      const chatData = await getChatsByUserId(sessionUser.id_user);
-      setChats(chatData);
-    } else {
-      setSessionUserId(null);
-      setChats([]);
-    }
-  };
-
-  useEffect(() => {
-    loadChats();
-  }, []);
 
   const handleChatSelect = (chat: any) => {
     const otherParticipant = chat.ChatParticipants.find(
@@ -45,10 +31,19 @@ const Sidebar: React.FC<SidebarProps> = ({
     );
     const chatName = otherParticipant?.Users?.username || "Unknown";
 
-    // Set selected chat with the name of the other participant
     onSelectChat({ ...chat, name: chatName });
     setSelectedChatId(chat.id_chat);
   };
+
+  useEffect(() => {
+    const getSessionUserId = async () => {
+      const sessionUser = await fetchUser();
+      if (sessionUser?.id_user) {
+        setSessionUserId(sessionUser.id_user);
+      }
+    };
+    getSessionUserId();
+  }, []);
 
   const filteredChats = chats.filter((chat) => {
     const otherParticipant = chat.ChatParticipants?.find(
@@ -67,7 +62,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       <div>
         <div className="flex items-center justify-between mb-4">
           <Title text="Chats" />
-          <AddChatButton refreshChats={loadChats} />
+          <AddChatButton refreshChats={refreshChats} />
         </div>
         <Searchbar onSearch={setSearchQuery} />
         <ul>
@@ -75,9 +70,8 @@ const Sidebar: React.FC<SidebarProps> = ({
             const otherParticipant = chat.ChatParticipants?.find(
               (participant: any) => participant.id_user !== sessionUserId
             );
-            const lastMessage = chat.Messages?.[0];
             const messagePrefix =
-              lastMessage && lastMessage.id_sender === sessionUserId
+              chat.lastMessage && chat.lastMessage.id_sender === sessionUserId
                 ? "You"
                 : otherParticipant?.Users?.username || "Unknown";
 
@@ -87,8 +81,8 @@ const Sidebar: React.FC<SidebarProps> = ({
                 name={otherParticipant.Users.username}
                 profilePictureUrl={otherParticipant.Users.profile_picture_url}
                 lastMessage={
-                  lastMessage
-                    ? `${messagePrefix}: ${lastMessage.content}`
+                  chat.lastMessage
+                    ? `${messagePrefix}: ${chat.lastMessage.content}`
                     : "No messages yet"
                 }
                 onClick={() => handleChatSelect(chat)}
@@ -100,7 +94,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       </div>
       <div className="mt-auto">
         <ProfileButton
-          refreshChats={loadChats}
+          refreshChats={refreshChats}
           onLogout={onLogout}
           onLogin={onLogin}
         />
