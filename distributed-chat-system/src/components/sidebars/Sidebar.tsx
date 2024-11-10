@@ -9,9 +9,15 @@ import ProfileButton from "../buttons/ProfileButton";
 
 interface SidebarProps {
   onSelectChat: (chat: any) => void;
+  onLogout: () => void;
+  onLogin: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ onSelectChat }) => {
+const Sidebar: React.FC<SidebarProps> = ({
+  onSelectChat,
+  onLogout,
+  onLogin,
+}) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [chats, setChats] = useState<any[]>([]);
   const [sessionUserId, setSessionUserId] = useState<string | null>(null);
@@ -93,7 +99,11 @@ const Sidebar: React.FC<SidebarProps> = ({ onSelectChat }) => {
         </ul>
       </div>
       <div className="mt-auto">
-        <ProfileButton refreshChats={loadChats} />
+        <ProfileButton
+          refreshChats={loadChats}
+          onLogout={onLogout}
+          onLogin={onLogin}
+        />
       </div>
     </aside>
   );

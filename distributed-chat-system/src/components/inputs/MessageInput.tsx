@@ -11,6 +11,8 @@ interface MessageInputProps {
   fileType?: string; // Optional file type if the message includes a file
   selfDestructTime?: string; // Optional self-destruct time
   encryptionKey?: string; // Optional encryption key
+  message: string;
+  setMessage: (msg: string) => void;
 }
 
 const MessageInput: React.FC<MessageInputProps> = ({
@@ -21,9 +23,9 @@ const MessageInput: React.FC<MessageInputProps> = ({
   fileType,
   selfDestructTime,
   encryptionKey,
+  message,
+  setMessage,
 }) => {
-  const [message, setMessage] = useState("");
-
   const handleSend = async () => {
     if (message.trim() && chatId) {
       try {

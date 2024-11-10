@@ -9,9 +9,15 @@ import { signOut } from "../../services/authService"; // Import signOut function
 
 interface ProfileButtonProps {
   refreshChats: () => void; // Add refreshChats prop to trigger chat refresh
+  onLogout: () => void; // Accept onLogout prop
+  onLogin: () => void;
 }
 
-const ProfileButton: React.FC<ProfileButtonProps> = ({ refreshChats }) => {
+const ProfileButton: React.FC<ProfileButtonProps> = ({
+  refreshChats,
+  onLogout,
+  onLogin,
+}) => {
   const [user, setUser] = useState<any>(null);
   const [showProfile, setShowProfile] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false); // Manage the toggle state
@@ -36,12 +42,14 @@ const ProfileButton: React.FC<ProfileButtonProps> = ({ refreshChats }) => {
     setUser(null); // Clear user state after logout
     refreshChats(); // Refresh chats after logout
     setShowProfile(false);
+    onLogout();
   };
 
   const handleLoginSuccess = () => {
     getUser(); // Refresh user data after login
     setShowProfile(true); // Automatically show the profile after login
     refreshChats(); // Refresh chats after login
+    onLogin();
   };
 
   const handleRegisterSuccess = () => {
@@ -49,6 +57,7 @@ const ProfileButton: React.FC<ProfileButtonProps> = ({ refreshChats }) => {
     getUser(); // Refresh user data after registration
     setShowProfile(true); // Automatically show the profile after registration
     refreshChats(); // Refresh chats after registration
+    onLogin();
   };
 
   return (
