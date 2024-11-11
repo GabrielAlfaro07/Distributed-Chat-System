@@ -79,6 +79,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
         sessionUserId={sessionUserId}
         isLoggedIn={isLoggedIn}
         selectedChat={selectedChat}
+        onMessageUpdated={fetchMessages} // Pass fetchMessages as onMessageUpdated
       />
       {isLoggedIn && selectedChat && (
         <MessageInput

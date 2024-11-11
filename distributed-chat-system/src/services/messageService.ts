@@ -68,3 +68,25 @@ export const sendMessage = async (
   if (error) throw error;
   return data;
 };
+
+// Update a message's content and mark it as edited
+export const updateMessage = async (messageId: string, newContent: string) => {
+  const { data, error } = await supabase
+    .from("Messages")
+    .update({ content: newContent, is_edited: true })
+    .eq("id_message", messageId);
+
+  if (error) throw error;
+  return data;
+};
+
+// Mark a message as deleted
+export const deleteMessage = async (messageId: string) => {
+  const { data, error } = await supabase
+    .from("Messages")
+    .update({ is_deleted: true })
+    .eq("id_message", messageId);
+
+  if (error) throw error;
+  return data;
+};
