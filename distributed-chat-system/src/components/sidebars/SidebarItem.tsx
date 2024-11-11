@@ -5,7 +5,7 @@ interface SidebarItemProps {
   profilePictureUrl: string;
   lastMessage: string;
   onClick: () => void;
-  selected: boolean; // Add selected prop
+  selected: boolean;
 }
 
 const SidebarItem: React.FC<SidebarItemProps> = ({
@@ -20,18 +20,16 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
       onClick={onClick}
       className={`flex items-center p-2 cursor-pointer rounded transition duration-200 ${
         selected ? "bg-blue-100" : "hover:bg-gray-200"
-      }`} // Apply selected styling
+      }`}
     >
       <img
         src={profilePictureUrl}
         alt={name}
         className="w-10 h-10 rounded-full mr-3"
       />
-      <div className="flex flex-col w-full">
+      <div className="flex flex-col w-full pr-12">
         <span className="font-semibold text-gray-900">{name}</span>
-        <span className="text-gray-500 text-sm truncate max-w-full">
-          {lastMessage}
-        </span>
+        <span className="text-gray-500 text-sm truncate">{lastMessage}</span>
       </div>
     </li>
   );

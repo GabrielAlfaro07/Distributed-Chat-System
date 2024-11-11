@@ -30,10 +30,8 @@ const ChatArea: React.FC<ChatAreaProps> = ({
       setMessages(chatMessages);
 
       // Update the last message in the sidebar chat item
-      if (chatMessages.length > 0) {
-        const lastMessage = chatMessages[chatMessages.length - 1];
-        updateChat(selectedChat.id_chat, lastMessage);
-      }
+      const lastMessage = chatMessages.filter((msg) => !msg.is_deleted).pop();
+      updateChat(selectedChat.id_chat, lastMessage || null);
     }
   };
 

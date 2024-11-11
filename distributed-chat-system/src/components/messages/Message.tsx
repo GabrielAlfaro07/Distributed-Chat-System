@@ -58,7 +58,7 @@ const Message: React.FC<MessageProps> = ({
   return (
     <div className={`mb-4 flex ${isLeftAligned ? "" : "justify-end"}`}>
       <div
-        className={`p-2 rounded w-2/3 ${
+        className={`py-2 pl-2 pr-4 rounded w-2/3 ${
           isLeftAligned ? "bg-gray-300" : "bg-blue-500 text-white"
         } relative`}
       >
@@ -92,7 +92,6 @@ const Message: React.FC<MessageProps> = ({
           </>
         )}
 
-        {/* Conditionally render options button in the top right corner */}
         {id_sender === session_user_id && (
           <div className="absolute top-1 right-1">
             <MessageOptionsButton
