@@ -14,6 +14,7 @@ const HomeScreen: React.FC = () => {
   useEffect(() => {
     const getSessionUserId = async () => {
       const sessionUser = await fetchUser();
+      console.log("Session User:", sessionUser); // Log session user
       if (sessionUser) {
         setSessionUserId(sessionUser.id_user);
       } else {
@@ -25,10 +26,11 @@ const HomeScreen: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (sessionUserId) {
+    if (sessionUserId && isLoggedIn) {
+      console.log("Loading chats for user:", sessionUserId);
       loadChats();
     }
-  }, [sessionUserId]);
+  }, [sessionUserId, isLoggedIn]);
 
   const updateChat = (chatId: string, lastMessage: any) => {
     setChats((prevChats) =>
@@ -40,10 +42,11 @@ const HomeScreen: React.FC = () => {
 
   const handleLogin = async () => {
     const sessionUser = await fetchUser();
+    console.log("Session User on Login:", sessionUser); // Log session user during login
     if (sessionUser) {
       setIsLoggedIn(true);
-      setSessionUserId(sessionUser.id_user);
       setSelectedChat(null);
+      setSessionUserId(sessionUser.id_user);
     }
   };
 
@@ -51,17 +54,52 @@ const HomeScreen: React.FC = () => {
     await signOut();
     setIsLoggedIn(false);
     setSessionUserId(""); // Clear session user ID
-    setChats([]); // Clear the chats in the sidebar
     setSelectedChat(null); // Deselect any selected chat
+    setChats([]); // Clear the chats in the sidebar
   };
 
   const loadChats = async () => {
-    const chatData = await getChatsByUserId(sessionUserId);
-    setChats(chatData);
+    if (!sessionUserId) {
+      console.log("No session user ID found, skipping chat load.");
+      return;
+    }
+
+    console.log("Loading chats for user:", sessionUserId);
+    try {
+      const chatData = await getChatsByUserId(sessionUserId);
+      console.log("Fetched Chat Data:", chatData);
+
+      const updatedChats = chatData.map((chat) => {
+        const otherParticipant = chat.ChatParticipants.find(
+          (participant) => participant.id_user !== sessionUserId
+        );
+
+        // Safely access Users[0] if it exists
+        const otherParticipantName =
+          otherParticipant?.Users?.username || "Unknown";
+        const otherParticipantProfilePicture =
+          otherParticipant?.Users?.[0]?.profile_picture_url || "";
+
+        console.log("Other Participant:", otherParticipant);
+        console.log("Other Participant Name:", otherParticipantName);
+
+        return {
+          ...chat,
+          name: otherParticipantName,
+          profilePictureUrl: otherParticipantProfilePicture,
+        };
+      });
+
+      setChats(updatedChats);
+      console.log("Updated Chats:", updatedChats);
+    } catch (error) {
+      console.error("Error loading chats:", error);
+    }
   };
 
   const handleDeleteChat = async () => {
     if (selectedChat) {
+      console.log("Deleting chat:", selectedChat.id_chat); // Log chat deletion
       await deleteChatById(selectedChat.id_chat);
       setSelectedChat(null);
       loadChats();

@@ -1,6 +1,25 @@
 import { supabase } from "../../supabaseClient";
 import { toast } from "react-toastify";
 
+// Define the structure of a chat participant
+type ChatParticipant = {
+  id_user: string;
+  Users: {
+    username: string;
+    profile_picture_url: string;
+  }[];
+};
+
+type Chat = {
+  id_chat: string;
+  ChatParticipants: ChatParticipant[];
+  Messages: {
+    content: string;
+    created_at: string;
+    id_sender: string;
+  }[];
+};
+
 export const subscribeToChats = (
   userId: string,
   onChatAdded: (chat: any) => void
@@ -27,7 +46,7 @@ export const subscribeToChats = (
 };
 
 // Fetch complete chat details where the user is a participant
-export const getChatsByUserId = async (userId: string) => {
+export const getChatsByUserId = async (userId: string): Promise<Chat[]> => {
   const { data: chatParticipantData, error: participantError } = await supabase
     .from("ChatParticipants")
     .select("id_chat")
@@ -42,10 +61,16 @@ export const getChatsByUserId = async (userId: string) => {
     .from("Chats")
     .select(
       `
-      id_chat,
-      ChatParticipants(id_user, Users(username, profile_picture_url)),
-      Messages(content, created_at, id_sender)
-    `
+    id_chat,
+    ChatParticipants (
+      id_user,
+      Users (
+        username,
+        profile_picture_url
+      )
+    ),
+    Messages (content, created_at, id_sender)
+  `
     )
     .in("id_chat", chatIds)
     .order("created_at", { foreignTable: "Messages", ascending: false })
@@ -53,7 +78,7 @@ export const getChatsByUserId = async (userId: string) => {
 
   if (chatError) throw chatError;
 
-  return chatData;
+  return chatData as Chat[];
 };
 
 // Insert a new chat

@@ -26,12 +26,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
 
   const handleChatSelect = (chat: any) => {
-    const otherParticipant = chat.ChatParticipants.find(
-      (participant: any) => participant.id_user !== sessionUserId
-    );
-    const chatName = otherParticipant?.Users?.username || "Unknown";
-
-    onSelectChat({ ...chat, name: chatName });
+    onSelectChat(chat);
     setSelectedChatId(chat.id_chat);
   };
 
@@ -45,17 +40,12 @@ const Sidebar: React.FC<SidebarProps> = ({
     getSessionUserId();
   }, []);
 
-  const filteredChats = chats.filter((chat) => {
-    const otherParticipant = chat.ChatParticipants?.find(
-      (participant: any) => participant.id_user !== sessionUserId
-    );
-    return (
-      otherParticipant?.Users?.username &&
-      otherParticipant.Users.username
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase())
-    );
-  });
+  // Filter chats based on the search query using chat.name
+  const filteredChats = chats.filter((chat) =>
+    chat.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  console.log("Filtered Chats:", filteredChats); // Log filtered chats for debugging
 
   return (
     <aside className="w-1/3 bg-white border-r border-gray-200 p-4 flex flex-col justify-between">
@@ -67,19 +57,16 @@ const Sidebar: React.FC<SidebarProps> = ({
         <Searchbar onSearch={setSearchQuery} />
         <ul>
           {filteredChats.map((chat) => {
-            const otherParticipant = chat.ChatParticipants?.find(
-              (participant: any) => participant.id_user !== sessionUserId
-            );
             const messagePrefix =
               chat.lastMessage && chat.lastMessage.id_sender === sessionUserId
                 ? "You"
-                : otherParticipant?.Users?.username || "Unknown";
+                : chat.name;
 
             return (
               <SidebarItem
                 key={chat.id_chat}
-                name={otherParticipant.Users.username}
-                profilePictureUrl={otherParticipant.Users.profile_picture_url}
+                name={chat.name}
+                profilePictureUrl={chat.profile_picture_url || ""}
                 lastMessage={
                   chat.lastMessage
                     ? `${messagePrefix}: ${chat.lastMessage.content}`

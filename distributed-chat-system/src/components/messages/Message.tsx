@@ -58,12 +58,12 @@ const Message: React.FC<MessageProps> = ({
   return (
     <div className={`mb-4 flex ${isLeftAligned ? "" : "justify-end"}`}>
       <div
-        className={`py-2 pl-2 pr-4 rounded w-2/3 ${
+        className={`p-2 rounded w-2/3 ${
           isLeftAligned ? "bg-gray-300" : "bg-blue-500 text-white"
         } relative`}
       >
         {isEditing ? (
-          <div>
+          <div className="pr-4">
             <input
               type="text"
               value={editedContent}
@@ -82,7 +82,7 @@ const Message: React.FC<MessageProps> = ({
           </div>
         ) : (
           <>
-            <div>{content}</div>
+            <div className="pr-2">{content}</div>
             <div className="text-xs mt-1 text-right">
               {time}{" "}
               {isEdited && (
