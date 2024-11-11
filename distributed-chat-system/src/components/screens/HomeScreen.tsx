@@ -50,7 +50,9 @@ const HomeScreen: React.FC = () => {
   const handleLogout = async () => {
     await signOut();
     setIsLoggedIn(false);
-    setSelectedChat(null);
+    setSessionUserId(""); // Clear session user ID
+    setChats([]); // Clear the chats in the sidebar
+    setSelectedChat(null); // Deselect any selected chat
   };
 
   const loadChats = async () => {
@@ -78,7 +80,7 @@ const HomeScreen: React.FC = () => {
 
       <main className="flex-1 flex flex-col">
         <ChatHeader
-          title={selectedChat?.name || "Select a Chat"}
+          title={selectedChat?.name || "Select a chat"}
           onDeleteChat={handleDeleteChat}
         />
         <ChatArea
