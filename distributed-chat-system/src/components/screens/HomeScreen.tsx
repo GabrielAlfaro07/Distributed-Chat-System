@@ -4,12 +4,14 @@ import ChatHeader from "../headers/ChatHeader";
 import ChatArea from "../chat/ChatArea";
 import { deleteChatById, getChatsByUserId } from "../../services/chatService";
 import { fetchUser, signOut } from "../../services/authService";
+import { getBlockedUsers } from "../../services/blockedUserService"; // Import blocked user service
 
 const HomeScreen: React.FC = () => {
   const [selectedChat, setSelectedChat] = useState<any>(null);
   const [chats, setChats] = useState<any[]>([]);
   const [sessionUserId, setSessionUserId] = useState<string>("");
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true);
+  const [blockedUsers, setBlockedUsers] = useState<string[]>([]); // New state for blocked users
 
   useEffect(() => {
     const getSessionUserId = async () => {
@@ -31,6 +33,21 @@ const HomeScreen: React.FC = () => {
       loadChats();
     }
   }, [sessionUserId, isLoggedIn]);
+  useEffect(() => {
+    if (sessionUserId && isLoggedIn) {
+      loadChats();
+      loadBlockedUsers(); // Fetch blocked users when session user ID is available
+    }
+  }, [sessionUserId, isLoggedIn]);
+
+  const loadBlockedUsers = async () => {
+    try {
+      const blocked = await getBlockedUsers(sessionUserId);
+      setBlockedUsers(blocked);
+    } catch (error) {
+      console.error("Error loading blocked users:", error);
+    }
+  };
 
   const updateChat = (chatId: string, lastMessage: any) => {
     setChats((prevChats) =>
@@ -75,6 +92,7 @@ const HomeScreen: React.FC = () => {
         );
 
         // Safely access Users[0] if it exists
+        const otherParticipantId = otherParticipant?.id_user || null;
         const otherParticipantName =
           otherParticipant?.Users?.username || "Unknown";
         const otherParticipantProfilePicture =
@@ -87,6 +105,7 @@ const HomeScreen: React.FC = () => {
           ...chat,
           name: otherParticipantName,
           profilePictureUrl: otherParticipantProfilePicture,
+          otherParticipantId,
         };
       });
 
@@ -120,6 +139,8 @@ const HomeScreen: React.FC = () => {
         <ChatHeader
           title={selectedChat?.name || "Select a chat"}
           onDeleteChat={handleDeleteChat}
+          sessionUserId={sessionUserId}
+          otherParticipantId={selectedChat?.otherParticipantId}
         />
         <ChatArea
           selectedChat={selectedChat}

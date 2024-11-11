@@ -6,12 +6,13 @@ import {
   subscribeToMessages,
   unsubscribe,
 } from "../../services/messageService";
+import { isUserBlocked } from "../../services/blockedUserService"; // Import blocked check
 
 interface ChatAreaProps {
   selectedChat: any;
   sessionUserId: string;
   isLoggedIn: boolean;
-  updateChat: (chatId: string, lastMessage: any) => void; // Add this prop
+  updateChat: (chatId: string, lastMessage: any) => void;
 }
 
 const ChatArea: React.FC<ChatAreaProps> = ({
@@ -23,29 +24,43 @@ const ChatArea: React.FC<ChatAreaProps> = ({
   const [messages, setMessages] = useState<any[]>([]);
   const [inputMessage, setInputMessage] = useState("");
   const [messageSubscription, setMessageSubscription] = useState<any>(null);
+  const [isBlocked, setIsBlocked] = useState<boolean>(false); // New state for blocked status
 
   const fetchMessages = async () => {
     if (selectedChat?.id_chat) {
       const chatMessages = await getMessagesByChatId(selectedChat.id_chat);
       setMessages(chatMessages);
-
-      // Update the last message in the sidebar chat item
       const lastMessage = chatMessages.filter((msg) => !msg.is_deleted).pop();
       updateChat(selectedChat.id_chat, lastMessage || null);
     }
   };
 
   useEffect(() => {
+    const checkBlockedStatus = async () => {
+      if (selectedChat && sessionUserId) {
+        const otherUserId = selectedChat.ChatParticipants.find(
+          (participant) => participant.id_user !== sessionUserId
+        )?.id_user;
+
+        if (otherUserId) {
+          const isBlocked = await isUserBlocked(sessionUserId, otherUserId);
+          setIsBlocked(isBlocked);
+        }
+      }
+    };
+
+    checkBlockedStatus();
+  }, [selectedChat, sessionUserId]);
+
+  useEffect(() => {
     if (selectedChat?.id_chat) {
       fetchMessages();
       setInputMessage("");
 
-      // Unsubscribe from the previous chat's message subscription if it exists
       if (messageSubscription) {
         unsubscribe(messageSubscription);
       }
 
-      // Set up real-time subscription for the current chat
       const newMessageSubscription = subscribeToMessages(
         selectedChat.id_chat,
         (newMessage) => {
@@ -58,10 +73,8 @@ const ChatArea: React.FC<ChatAreaProps> = ({
 
       setMessageSubscription(newMessageSubscription);
 
-      // Cleanup function to unsubscribe when the component unmounts or `selectedChat` changes
       return () => {
         if (newMessageSubscription) {
-          // Perform async unsubscribe in an immediately-invoked function
           (async () => {
             await unsubscribe(newMessageSubscription);
           })();
@@ -77,7 +90,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
         sessionUserId={sessionUserId}
         isLoggedIn={isLoggedIn}
         selectedChat={selectedChat}
-        onMessageUpdated={fetchMessages} // Pass fetchMessages as onMessageUpdated
+        onMessageUpdated={fetchMessages}
       />
       {isLoggedIn && selectedChat && (
         <MessageInput
@@ -86,6 +99,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
           onMessageSent={fetchMessages}
           message={inputMessage}
           setMessage={setInputMessage}
+          isBlocked={isBlocked} // Pass blocked status to MessageInput
         />
       )}
     </div>
