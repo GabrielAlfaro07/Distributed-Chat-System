@@ -1,4 +1,3 @@
-// MessageList.tsx
 import React from "react";
 import Message from "../messages/Message";
 import EmptyStateMessage from "../messages/EmptyStageMessage";
@@ -9,6 +8,7 @@ interface MessageListProps {
   isLoggedIn: boolean;
   selectedChat: any;
   onMessageUpdated: () => void;
+  searchQuery; // New prop for search query
 }
 
 const MessageList: React.FC<MessageListProps> = ({
@@ -17,11 +17,12 @@ const MessageList: React.FC<MessageListProps> = ({
   isLoggedIn,
   selectedChat,
   onMessageUpdated,
+  searchQuery,
 }) => (
-  <div className="flex-1 p-4 overflow-y-auto">
+  <div className="p-4 overflow-y-auto max-h-[calc(100vh-8.1rem)]">
     {isLoggedIn && selectedChat ? (
       messages
-        .filter((msg) => !msg.is_deleted) // Filter out deleted messages
+        .filter((msg) => !msg.is_deleted)
         .map((msg) => (
           <Message
             key={msg.id_message}
@@ -30,9 +31,10 @@ const MessageList: React.FC<MessageListProps> = ({
             time={new Date(msg.created_at).toLocaleTimeString()}
             alignment={msg.id_sender === sessionUserId ? "right" : "left"}
             isEdited={msg.is_edited}
-            onMessageUpdated={onMessageUpdated} // Refresh messages when a message is updated or deleted
+            onMessageUpdated={onMessageUpdated}
             id_sender={msg.id_sender}
             session_user_id={sessionUserId}
+            searchQuery={searchQuery} // Pass search query to each message
           />
         ))
     ) : (

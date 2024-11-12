@@ -12,6 +12,7 @@ const HomeScreen: React.FC = () => {
   const [sessionUserId, setSessionUserId] = useState<string>("");
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true);
   const [blockedUsers, setBlockedUsers] = useState<string[]>([]); // New state for blocked users
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const getSessionUserId = async () => {
@@ -141,12 +142,14 @@ const HomeScreen: React.FC = () => {
           onDeleteChat={handleDeleteChat}
           sessionUserId={sessionUserId}
           otherParticipantId={selectedChat?.otherParticipantId}
+          onSearch={setSearchQuery}
         />
         <ChatArea
           selectedChat={selectedChat}
           sessionUserId={sessionUserId}
           isLoggedIn={isLoggedIn}
           updateChat={updateChat}
+          searchQuery={searchQuery}
         />
       </main>
     </div>

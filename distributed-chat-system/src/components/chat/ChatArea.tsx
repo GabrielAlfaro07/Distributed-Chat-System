@@ -6,10 +6,11 @@ import {
   subscribeToMessages,
   unsubscribe,
 } from "../../services/messageService";
-import { isUserBlocked } from "../../services/blockedUserService"; // Import blocked check
+import { isUserBlocked } from "../../services/blockedUserService";
 
 interface ChatAreaProps {
   selectedChat: any;
+  searchQuery: any;
   sessionUserId: string;
   isLoggedIn: boolean;
   updateChat: (chatId: string, lastMessage: any) => void;
@@ -17,6 +18,7 @@ interface ChatAreaProps {
 
 const ChatArea: React.FC<ChatAreaProps> = ({
   selectedChat,
+  searchQuery,
   sessionUserId,
   isLoggedIn,
   updateChat,
@@ -24,7 +26,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
   const [messages, setMessages] = useState<any[]>([]);
   const [inputMessage, setInputMessage] = useState("");
   const [messageSubscription, setMessageSubscription] = useState<any>(null);
-  const [isBlocked, setIsBlocked] = useState<boolean>(false); // New state for blocked status
+  const [isBlocked, setIsBlocked] = useState<boolean>(false);
 
   const fetchMessages = async () => {
     if (selectedChat?.id_chat) {
@@ -84,23 +86,31 @@ const ChatArea: React.FC<ChatAreaProps> = ({
   }, [selectedChat]);
 
   return (
-    <div className="flex-1 flex flex-col">
-      <MessageList
-        messages={messages}
-        sessionUserId={sessionUserId}
-        isLoggedIn={isLoggedIn}
-        selectedChat={selectedChat}
-        onMessageUpdated={fetchMessages}
-      />
-      {isLoggedIn && selectedChat && (
-        <MessageInput
-          chatId={selectedChat.id_chat}
-          senderId={sessionUserId}
-          onMessageSent={fetchMessages}
-          message={inputMessage}
-          setMessage={setInputMessage}
-          isBlocked={isBlocked} // Pass blocked status to MessageInput
+    <div className="flex-1 flex flex-col h-full">
+      {/* Make MessageList take the remaining space with overflow scrolling */}
+      <div className="flex-1 overflow-y-auto">
+        <MessageList
+          messages={messages}
+          sessionUserId={sessionUserId}
+          isLoggedIn={isLoggedIn}
+          selectedChat={selectedChat}
+          onMessageUpdated={fetchMessages}
+          searchQuery={searchQuery}
         />
+      </div>
+
+      {/* Fixed height for MessageInput to keep it always visible */}
+      {isLoggedIn && selectedChat && (
+        <div>
+          <MessageInput
+            chatId={selectedChat.id_chat}
+            senderId={sessionUserId}
+            onMessageSent={fetchMessages}
+            message={inputMessage}
+            setMessage={setInputMessage}
+            isBlocked={isBlocked}
+          />
+        </div>
       )}
     </div>
   );
