@@ -1,5 +1,6 @@
 import { supabase } from "../../supabaseClient";
 import { UserInfo } from "./authService";
+import { logUserActivity } from "./activityLogger";
 
 // Function to get all users except the current session user
 export const getAllUsersExceptSessionUser = async (sessionUserId: string) => {
@@ -23,6 +24,10 @@ export const updateUser = async (
     .eq("id_user", sessionUserId);
 
   if (error) throw error;
+
+  // Log the update activity
+  await logUserActivity(sessionUserId, "Update User");
+
   return data;
 };
 
@@ -34,5 +39,9 @@ export const deleteUser = async (sessionUserId: string) => {
     .eq("id_user", sessionUserId);
 
   if (error) throw error;
+
+  // Log the delete activity
+  await logUserActivity(sessionUserId, "Delete User");
+
   return data;
 };

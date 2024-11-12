@@ -1,5 +1,6 @@
 import { supabase } from "../../supabaseClient";
 import { toast } from "react-toastify";
+import { logUserActivity } from "./activityLogger";
 
 // Define the structure of a chat participant
 type ChatParticipant = {
@@ -93,6 +94,8 @@ export const createChat = async (sessionUserId: string) => {
   if (error) throw error;
 
   toast.success("Chat created successfully!");
+
+  await logUserActivity(sessionUserId, `Create Chat ${data.id_chat}`);
   return data;
 };
 
@@ -114,7 +117,19 @@ export const deleteChatById = async (idChat: string) => {
       .eq("id_chat", idChat);
 
     if (chatError) throw chatError;
+    const { data: sessionData, error: sessionError } =
+      await supabase.auth.getSession();
 
+    if (sessionError) {
+      console.error("Error fetching user session:", sessionError.message);
+      return null;
+    }
+    const user = sessionData?.session?.user;
+    if (!user) return null;
+
+    const userId = user.id;
+
+    await logUserActivity(userId, `Delete Chat ${idChat}`);
     toast.success("Chat deleted successfully!");
   } catch (error) {
     console.error("Error deleting chat:", error);

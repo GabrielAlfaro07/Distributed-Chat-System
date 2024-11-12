@@ -1,4 +1,5 @@
 import { supabase } from "../../supabaseClient";
+import { logUserActivity } from "./activityLogger"; // Import the logging function
 
 export const subscribeToMessages = (
   chatId: string,
@@ -66,6 +67,9 @@ export const sendMessage = async (
   ]);
 
   if (error) throw error;
+
+  // Log the send message activity
+  await logUserActivity(senderId, `Send Message in Chat ${chatId}`);
   return data;
 };
 
@@ -77,6 +81,20 @@ export const updateMessage = async (messageId: string, newContent: string) => {
     .eq("id_message", messageId);
 
   if (error) throw error;
+  const { data: sessionData, error: sessionError } =
+    await supabase.auth.getSession();
+
+  if (sessionError) {
+    console.error("Error fetching user session:", sessionError.message);
+    return null;
+  }
+  const user = sessionData?.session?.user;
+  if (!user) return null;
+
+  const userId = user.id;
+
+  await logUserActivity(userId, `Update Message ${messageId}`);
+
   return data;
 };
 
@@ -88,5 +106,19 @@ export const deleteMessage = async (messageId: string) => {
     .eq("id_message", messageId);
 
   if (error) throw error;
+  const { data: sessionData, error: sessionError } =
+    await supabase.auth.getSession();
+
+  if (sessionError) {
+    console.error("Error fetching user session:", sessionError.message);
+    return null;
+  }
+  const user = sessionData?.session?.user;
+  if (!user) return null;
+
+  const userId = user.id;
+
+  await logUserActivity(userId, `Delete Message ${messageId}`);
+
   return data;
 };

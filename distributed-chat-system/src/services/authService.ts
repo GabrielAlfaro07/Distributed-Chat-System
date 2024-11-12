@@ -1,6 +1,6 @@
-// authService.ts
 import { supabase } from "../../supabaseClient";
 import { toast } from "react-toastify";
+import { logUserActivity } from "./activityLogger";
 
 // Define the updated UserInfo interface with id_user
 export interface UserInfo {
@@ -46,6 +46,11 @@ export const signUp = async (
     return { error: insertError };
   }
 
+  // Log the sign-up activity
+  if (user) {
+    await logUserActivity(user.id, "Sign Up");
+  }
+
   return { user };
 };
 
@@ -75,6 +80,9 @@ export const signIn = async (email: string, password: string) => {
     if (updateError) {
       console.error("Error updating user status:", updateError.message);
     }
+
+    // Log the sign-in activity
+    await logUserActivity(user.id, "Sign In");
   }
 
   return { user };
@@ -105,6 +113,9 @@ export const signOut = async () => {
       toast.error("Error updating status: " + updateError.message);
       return { error: updateError };
     }
+
+    // Log the sign-out activity
+    await logUserActivity(user.id, "Sign Out");
   }
 
   const { error: signOutError } = await supabase.auth.signOut();
@@ -141,6 +152,5 @@ export const fetchUser = async (id?: string): Promise<UserInfo | null> => {
     console.error("Error fetching user:", error.message);
     return null;
   }
-
   return data as UserInfo;
 };

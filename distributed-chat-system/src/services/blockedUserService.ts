@@ -1,5 +1,6 @@
 // src/services/blockedUserService.ts
 import { supabase } from "../../supabaseClient";
+import { logUserActivity } from "./activityLogger";
 
 // Function to add a blocked user
 export const addBlockedUser = async (userId: string, blockedUserId: string) => {
@@ -10,6 +11,8 @@ export const addBlockedUser = async (userId: string, blockedUserId: string) => {
   });
 
   if (error) throw error;
+
+  await logUserActivity(userId, `Blocked User ${blockedUserId}`);
   return data;
 };
 
@@ -25,6 +28,10 @@ export const removeBlockedUser = async (
     .eq("id_blocked", blockedUserId);
 
   if (error) throw error;
+  await logUserActivity(
+    userId,
+    `Removed User ${blockedUserId} From Blocked Users`
+  );
   return data;
 };
 
