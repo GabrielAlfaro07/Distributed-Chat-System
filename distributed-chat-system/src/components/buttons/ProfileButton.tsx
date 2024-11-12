@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from "react";
-import { fetchUser } from "../../services/authService";
+import { fetchUser, UserInfo } from "../../services/authService";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
 import LoginForm from "../forms/LoginForm";
 import ProfileDisplay from "../displays/ProfileDisplay";
-import RegisterForm from "../forms/RegisterForm"; // Import RegisterForm
-import { signOut } from "../../services/authService"; // Import signOut function
+import RegisterForm from "../forms/RegisterForm";
+import { updateUser } from "../../services/userService"; // Import update function
+import { toast } from "react-toastify";
 
 interface ProfileButtonProps {
-  refreshChats: () => void; // Add refreshChats prop to trigger chat refresh
-  onLogout: () => void; // Accept onLogout prop
+  refreshChats: () => void;
+  onLogout: () => void;
   onLogin: () => void;
 }
 
@@ -18,11 +19,10 @@ const ProfileButton: React.FC<ProfileButtonProps> = ({
   onLogout,
   onLogin,
 }) => {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<UserInfo | null>(null);
   const [showProfile, setShowProfile] = useState(false);
-  const [isRegistering, setIsRegistering] = useState(false); // Manage the toggle state
+  const [isRegistering, setIsRegistering] = useState(false);
 
-  // Fetch user on component mount or after actions like login/logout
   const getUser = async () => {
     const fetchedUser = await fetchUser();
     setUser(fetchedUser);
@@ -32,46 +32,61 @@ const ProfileButton: React.FC<ProfileButtonProps> = ({
     getUser();
   }, []);
 
-  // Handle toggling the profile display
   const toggleProfileDisplay = () => setShowProfile(!showProfile);
-
-  // Handle form toggle (login/register)
   const toggleForm = () => setIsRegistering(!isRegistering);
 
   const handleLogoutSuccess = () => {
-    setUser(null); // Clear user state after logout
-    refreshChats(); // Refresh chats after logout
+    setUser(null);
+    refreshChats();
     setShowProfile(false);
     onLogout();
   };
 
   const handleLoginSuccess = () => {
-    getUser(); // Refresh user data after login
-    setShowProfile(true); // Automatically show the profile after login
-    refreshChats(); // Refresh chats after login
+    getUser();
+    setShowProfile(true);
+    refreshChats();
     onLogin();
   };
 
   const handleRegisterSuccess = () => {
     toggleForm();
-    getUser(); // Refresh user data after registration
-    setShowProfile(true); // Automatically show the profile after registration
-    refreshChats(); // Refresh chats after registration
+    getUser();
+    setShowProfile(true);
+    refreshChats();
     onLogin();
+  };
+
+  const handleUserUpdate = async (updatedUser: Partial<UserInfo>) => {
+    if (user) {
+      try {
+        // Update the database
+        await updateUser(user.id_user, updatedUser);
+
+        // Update the local state after a successful database update
+        setUser({ ...user, ...updatedUser });
+        toast.success("Profile updated successfully!");
+      } catch (error) {
+        console.error("Error updating user profile:", error);
+        toast.error("Failed to update profile. Please try again.");
+      }
+    }
   };
 
   return (
     <div className="relative flex items-end">
-      {/* Profile Button */}
       <button onClick={toggleProfileDisplay} className="text-gray-600">
         <FontAwesomeIcon icon={faUser} size="xl" />
       </button>
 
-      {/* Floating Profile/Log In Display */}
       {showProfile && (
         <div className="absolute left-8 mt-2 p-4 bg-white border border-gray-200 shadow-lg rounded-md z-10 w-80">
           {user ? (
-            <ProfileDisplay user={user} onLogoutSuccess={handleLogoutSuccess} />
+            <ProfileDisplay
+              user={user}
+              onLogoutSuccess={handleLogoutSuccess}
+              onUserUpdate={handleUserUpdate}
+            />
           ) : isRegistering ? (
             <RegisterForm
               onToggleForm={toggleForm}
