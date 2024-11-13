@@ -47,8 +47,8 @@ export const sendMessage = async (
   chatId: string,
   senderId: string,
   content: string,
-  fileUrl?: string, // Optional field for file URL
-  fileType?: string, // Optional field for file type
+  fileUrl?: string | null, // Optional field for file URL
+  fileType?: string | null, // Optional field for file type
   selfDestructTime?: string, // Optional field for self-destruct time
   encryptionKey?: string // Optional field for encryption key
 ) => {
@@ -58,7 +58,7 @@ export const sendMessage = async (
       id_sender: senderId,
       content,
       file_url: fileUrl || null, // Use null if no file URL is provided
-      file_type: fileType || null, // Use null if no file type is provided
+      file_type: fileType || null,
       is_deleted: false, // Assuming new messages are not deleted
       is_edited: false, // New messages are not edited
       self_destruct_time: selfDestructTime || null, // Use null if no self-destruct time is provided

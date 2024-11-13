@@ -19,7 +19,7 @@ const MessageList: React.FC<MessageListProps> = ({
   onMessageUpdated,
   searchQuery,
 }) => (
-  <div className="p-4 overflow-y-auto max-h-[calc(100vh-8.1rem)]">
+  <div className="p-4 overflow-y-auto h-[calc(100vh-8.1rem)]">
     {isLoggedIn && selectedChat ? (
       messages
         .filter((msg) => !msg.is_deleted)
