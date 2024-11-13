@@ -59,6 +59,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
       fetchMessages();
       setInputMessage("");
 
+      // Clean up previous subscription before creating a new one
       if (messageSubscription) {
         unsubscribe(messageSubscription);
       }
@@ -77,9 +78,7 @@ const ChatArea: React.FC<ChatAreaProps> = ({
 
       return () => {
         if (newMessageSubscription) {
-          (async () => {
-            await unsubscribe(newMessageSubscription);
-          })();
+          unsubscribe(newMessageSubscription);
         }
       };
     }

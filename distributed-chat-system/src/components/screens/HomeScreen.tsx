@@ -5,6 +5,14 @@ import ChatArea from "../chat/ChatArea";
 import { deleteChatById, getChatsByUserId } from "../../services/chatService";
 import { fetchUser, signOut } from "../../services/authService";
 import { getBlockedUsers } from "../../services/blockedUserService"; // Import blocked user service
+import {
+  subscribeToChats,
+  unsubscribe as unsubscribeChat,
+} from "../../services/chatService";
+import {
+  subscribeToMessages,
+  unsubscribe as unsubscribeMessage,
+} from "../../services/messageService";
 
 const HomeScreen: React.FC = () => {
   const [selectedChat, setSelectedChat] = useState<any>(null);
@@ -13,6 +21,7 @@ const HomeScreen: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true);
   const [blockedUsers, setBlockedUsers] = useState<string[]>([]); // New state for blocked users
   const [searchQuery, setSearchQuery] = useState("");
+  const [chatSubscription, setChatSubscription] = useState<any>(null);
 
   useEffect(() => {
     const getSessionUserId = async () => {
@@ -32,14 +41,23 @@ const HomeScreen: React.FC = () => {
     if (sessionUserId && isLoggedIn) {
       console.log("Loading chats for user:", sessionUserId);
       loadChats();
-    }
-  }, [sessionUserId, isLoggedIn]);
-  useEffect(() => {
-    if (sessionUserId && isLoggedIn) {
-      loadChats();
       loadBlockedUsers(); // Fetch blocked users when session user ID is available
+      handleChatSubscription(); // Set up the chat subscription
     }
+    // Clean up chat subscription on unmount
+    return () => {
+      if (chatSubscription) unsubscribeChat(chatSubscription);
+    };
   }, [sessionUserId, isLoggedIn]);
+
+  const handleChatSubscription = () => {
+    if (chatSubscription) unsubscribeChat(chatSubscription); // Clear existing subscription if present
+
+    const newChatSubscription = subscribeToChats(sessionUserId, () => {
+      loadChats(); // Reload chats when an insert or delete occurs
+    });
+    setChatSubscription(newChatSubscription);
+  };
 
   const loadBlockedUsers = async () => {
     try {

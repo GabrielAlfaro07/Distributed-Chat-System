@@ -3,20 +3,21 @@ import { logUserActivity } from "./activityLogger"; // Import the logging functi
 
 export const subscribeToMessages = (
   chatId: string,
-  onMessageReceived: (message: any) => void
+  onMessageEvent: (message: any) => void // Pass the actual message object
 ) => {
   const messageChannel = supabase
     .channel(`messages_channel_${chatId}`)
     .on(
       "postgres_changes",
       {
-        event: "INSERT",
+        event: "*", // This listens to all events (INSERT, UPDATE, DELETE)
         schema: "public",
         table: "Messages",
         filter: `id_chat=eq.${chatId}`,
       },
       (payload) => {
-        onMessageReceived(payload.new);
+        const message = payload.new || payload.old; // Ensure we get the message object
+        onMessageEvent(message); // Pass the message object to the callback
       }
     )
     .subscribe();

@@ -23,27 +23,45 @@ type Chat = {
 
 export const subscribeToChats = (
   userId: string,
-  onChatAdded: (chat: any) => void
+  onChatEvent: (eventType: string, chat: any) => void
 ) => {
   const chatSubscription = supabase
-    .channel("chat_channel") // Optionally specify a custom channel name
+    .channel("chat_channel")
     .on(
       "postgres_changes",
       {
-        event: "INSERT",
+        event: "INSERT", // Listen for new chats
         schema: "public",
         table: "ChatParticipants",
         filter: `id_user=eq.${userId}`,
       },
       async (payload) => {
-        // Fetch all chats for the user after a new chat is added
+        const eventType = payload.eventType;
         const updatedChats = await getChatsByUserId(userId);
-        onChatAdded(updatedChats); // Pass the updated chat list to the callback function
+        onChatEvent(eventType, updatedChats);
+      }
+    )
+    .on(
+      "postgres_changes",
+      {
+        event: "DELETE", // Listen for chat deletions
+        schema: "public",
+        table: "ChatParticipants",
+        filter: `id_user=eq.${userId}`,
+      },
+      async (payload) => {
+        const eventType = payload.eventType;
+        const updatedChats = await getChatsByUserId(userId);
+        onChatEvent(eventType, updatedChats);
       }
     )
     .subscribe();
 
   return chatSubscription;
+};
+
+export const unsubscribe = async (subscription: any) => {
+  await subscription.unsubscribe();
 };
 
 // Fetch complete chat details where the user is a participant
