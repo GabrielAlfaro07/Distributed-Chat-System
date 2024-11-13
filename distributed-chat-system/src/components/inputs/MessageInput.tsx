@@ -28,6 +28,7 @@ const MessageInput: React.FC<MessageInputProps> = ({
 }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
+  // Modify handleSend in MessageInput.tsx
   const handleSend = async () => {
     if (message.trim() && chatId && !isBlocked) {
       let fileUrl: string | null = null;
@@ -35,10 +36,15 @@ const MessageInput: React.FC<MessageInputProps> = ({
 
       if (selectedFile) {
         try {
-          const filePath = await uploadFile(
-            selectedFile,
-            "message-attachments"
-          );
+          // Determine subfolder based on MIME type
+          let folder = "message-attachments";
+          if (selectedFile.type.startsWith("image/")) folder = "images";
+          else if (selectedFile.type.startsWith("video/")) folder = "videos";
+          else if (selectedFile.type.includes("pdf")) folder = "documents";
+          else folder = "files"; // Default for other file types
+
+          // Upload to the specific subfolder
+          const filePath = await uploadFile(selectedFile, folder);
           fileUrl = getFileURL(filePath);
           fileType = selectedFile.type;
         } catch (error) {

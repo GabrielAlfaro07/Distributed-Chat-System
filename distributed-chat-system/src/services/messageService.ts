@@ -100,25 +100,61 @@ export const updateMessage = async (messageId: string, newContent: string) => {
 
 // Mark a message as deleted
 export const deleteMessage = async (messageId: string) => {
-  const { data, error } = await supabase
-    .from("Messages")
-    .update({ is_deleted: true })
-    .eq("id_message", messageId);
+  try {
+    // Fetch the message to get the file URL (if it exists)
+    const { data: messageData, error: fetchError } = await supabase
+      .from("Messages")
+      .select("file_url")
+      .eq("id_message", messageId)
+      .single();
 
-  if (error) throw error;
-  const { data: sessionData, error: sessionError } =
-    await supabase.auth.getSession();
+    if (fetchError) throw fetchError;
 
-  if (sessionError) {
-    console.error("Error fetching user session:", sessionError.message);
-    return null;
+    // If there's a file_url, delete the file from the bucket
+    if (messageData?.file_url) {
+      // Extract the file path from the URL
+      const filePath = messageData.file_url.replace(
+        `${
+          supabase.storage.from("message-attachments").getPublicUrl("").data
+            .publicUrl
+        }/`,
+        ""
+      );
+
+      // Delete the file from the storage bucket
+      const { error: deleteError } = await supabase.storage
+        .from("message-attachments")
+        .remove([filePath]);
+
+      if (deleteError) throw deleteError;
+    }
+
+    // Mark the message as deleted
+    const { data, error } = await supabase
+      .from("Messages")
+      .update({ is_deleted: true })
+      .eq("id_message", messageId);
+
+    if (error) throw error;
+
+    // Fetch the session to log user activity
+    const { data: sessionData, error: sessionError } =
+      await supabase.auth.getSession();
+
+    if (sessionError) {
+      console.error("Error fetching user session:", sessionError.message);
+      return null;
+    }
+
+    const user = sessionData?.session?.user;
+    if (!user) return null;
+
+    const userId = user.id;
+    await logUserActivity(userId, `Delete Message ${messageId}`);
+
+    return data;
+  } catch (error) {
+    console.error("Failed to delete message:", error);
+    throw error;
   }
-  const user = sessionData?.session?.user;
-  if (!user) return null;
-
-  const userId = user.id;
-
-  await logUserActivity(userId, `Delete Message ${messageId}`);
-
-  return data;
 };

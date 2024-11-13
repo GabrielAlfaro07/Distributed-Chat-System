@@ -34,7 +34,9 @@ const MessageList: React.FC<MessageListProps> = ({
             onMessageUpdated={onMessageUpdated}
             id_sender={msg.id_sender}
             session_user_id={sessionUserId}
-            searchQuery={searchQuery} // Pass search query to each message
+            searchQuery={searchQuery}
+            fileUrl={msg.file_url}
+            fileType={msg.file_type}
           />
         ))
     ) : (
