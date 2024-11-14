@@ -20,7 +20,7 @@ const AddChatButton: React.FC<AddChatButtonProps> = ({ refreshChats }) => {
       </button>
 
       {showUserSelection && (
-        <div className="absolute mt-2 p-4 bg-white border border-gray-200 shadow-lg rounded-md z-10 w-80">
+        <div className="absolute mt-2 p-4 bg-gray-800 border border-gray-600 shadow-lg rounded-md z-10 w-80">
           <UserSelectionDisplay refreshChats={refreshChats} />
         </div>
       )}
