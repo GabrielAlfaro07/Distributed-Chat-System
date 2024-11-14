@@ -134,6 +134,17 @@ const Message: React.FC<MessageProps> = ({
 
   const isLeftAligned = alignment === "left";
 
+  function getHighlightedHTML(content: string, searchQuery: string): string {
+    if (!searchQuery) {
+      return content;
+    }
+
+    const regex = new RegExp(`(${searchQuery})`, "gi");
+
+    // Replace matches with <mark> tags, ensuring not to break HTML tags
+    return content.replace(regex, "<mark>$1</mark>");
+  }
+
   return (
     <div
       ref={messageRef}
@@ -167,9 +178,12 @@ const Message: React.FC<MessageProps> = ({
 
             {/* Message and timestamp row */}
             <div className="flex justify-between">
-              <div className="pr-2">
-                {getHighlightedText(content, searchQuery)}
-              </div>
+              <div
+                className="pr-2"
+                dangerouslySetInnerHTML={{
+                  __html: getHighlightedHTML(content, searchQuery),
+                }}
+              />
               <Timestamp
                 time={time}
                 isEdited={isEdited}

@@ -48,7 +48,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   console.log("Filtered Chats:", filteredChats); // Log filtered chats for debugging
 
   return (
-    <aside className="w-1/3 bg-white border-r border-gray-200 p-4 flex flex-col justify-between">
+    <aside className="w-1/3 bg-gray-800 border-r border-gray-900 p-4 flex flex-col justify-between">
       <div>
         <div className="flex items-center justify-between mb-4">
           <Title text="Chats" />

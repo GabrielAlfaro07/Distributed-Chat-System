@@ -141,7 +141,7 @@ const HomeScreen: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-gray-700">
       <Sidebar
         onSelectChat={setSelectedChat}
         onLogout={handleLogout}

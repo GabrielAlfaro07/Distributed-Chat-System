@@ -24,7 +24,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
 
   return (
-    <header className="p-4 bg-white border-b border-gray-200 flex justify-between items-center">
+    <header className="p-4 bg-gray-800 border-b border-gray-900 flex justify-between items-center">
       <Title text={title} />
       <div className="flex space-x-2">
         <input

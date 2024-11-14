@@ -17,7 +17,7 @@ const Searchbar: React.FC<SearchbarProps> = ({ onSearch }) => {
   };
 
   return (
-    <div className="flex items-center mb-4 p-2 border border-gray-300 rounded">
+    <div className="flex items-center mb-4 p-2 border bg-white border-gray-300 rounded-xl">
       <FontAwesomeIcon icon={faSearch} className="text-gray-500 mr-2" />
       <input
         type="text"

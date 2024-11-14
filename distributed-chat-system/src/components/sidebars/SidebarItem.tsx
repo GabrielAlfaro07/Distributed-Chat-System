@@ -18,8 +18,8 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
   return (
     <li
       onClick={onClick}
-      className={`flex items-center p-2 cursor-pointer rounded transition duration-200 ${
-        selected ? "bg-blue-100" : "hover:bg-gray-200"
+      className={`flex items-center p-2 cursor-pointer rounded-xl transition duration-200 ${
+        selected ? "bg-blue-500" : "hover:bg-gray-600"
       }`}
     >
       <img
@@ -28,8 +28,8 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
         className="w-10 h-10 rounded-full mr-3"
       />
       <div className="flex flex-col w-full pr-12">
-        <span className="font-semibold text-gray-900">{name}</span>
-        <span className="text-gray-500 text-sm truncate">{lastMessage}</span>
+        <span className="font-semibold text-white">{name}</span>
+        <span className="text-gray-400 text-sm truncate">{lastMessage}</span>
       </div>
     </li>
   );
