@@ -9,10 +9,6 @@ import {
   subscribeToChats,
   unsubscribe as unsubscribeChat,
 } from "../../services/chatService";
-import {
-  subscribeToMessages,
-  unsubscribe as unsubscribeMessage,
-} from "../../services/messageService";
 
 const HomeScreen: React.FC = () => {
   const [selectedChat, setSelectedChat] = useState<any>(null);
