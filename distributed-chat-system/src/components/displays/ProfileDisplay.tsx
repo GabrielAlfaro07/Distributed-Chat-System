@@ -44,11 +44,11 @@ const ProfileDisplay: React.FC<ProfileDisplayProps> = ({
             <Title text={user.username || "User"} />
           </div>
           <p className="text-gray-500">Information:</p>
-          <p className="mb-2">
+          <p className="mb-2 text-white">
             {user.information || "No information provided"}
           </p>
           <p className="text-gray-500">Phone Number:</p>
-          <p className="mb-2">
+          <p className="mb-2 text-white">
             {user.phone_number || "No phone number provided"}
           </p>
           <button
